@@ -12,14 +12,17 @@ public:
     void update(float delta_time);
 
     geom::Vector2 getPosition() const;
+    float getPitch() const;
     float getAngle() const;
     float getFov() const;
 
 private:
     geom::Vector2 position_{};
+    float pitch_{};
     float angle_{};
     float fov_{};
     float move_speed_{ 220.0F };
     float strafe_speed_{ 180.0F };
+    float pitch_speed_{ 1.8F };
     float turn_speed_{ 2.6F };
 };

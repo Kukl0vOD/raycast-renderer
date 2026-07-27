@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include <algorithm>
+
 ViewCamera::ViewCamera(geom::Vector2 position, float angle, float fov)
     : position_(position)
     , angle_(angle)
@@ -42,11 +44,28 @@ void ViewCamera::update(float delta_time)
     {
         position_ += right * (strafe_speed_ * speed_multiplier * delta_time);
     }
+
+    if (IsKeyDown(KEY_UP))
+    {
+        pitch_ -= pitch_speed_ * delta_time;
+    }
+
+    if (IsKeyDown(KEY_DOWN))
+    {
+        pitch_ += pitch_speed_ * delta_time;
+    }
+
+    pitch_ = std::clamp(pitch_, -80.0F * DEG2RAD, 80.0F * DEG2RAD);
 }
 
 geom::Vector2 ViewCamera::getPosition() const
 {
     return position_;
+}
+
+float ViewCamera::getPitch() const
+{
+    return pitch_;
 }
 
 float ViewCamera::getAngle() const

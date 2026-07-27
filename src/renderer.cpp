@@ -43,7 +43,7 @@ void Renderer::drawTopDown(const Scene& scene, const ViewCamera& camera, const s
     DrawCircleV(camera.getPosition(), 7.0F, SKYBLUE);
     DrawLineEx(camera.getPosition(), camera.getPosition() + geom::fromAngle(camera.getAngle()) * 28.0F, 3.0F, BLUE);
 
-    DrawText("W/S move, A/D turn, Q/E strafe, Shift faster, Tab view", 16, 16, 20, RAYWHITE);
+    DrawText("W/S move, <-/-> turn, A/D strafe, Up/Down look, Shift faster, Tab view", 16, 16, 20, RAYWHITE);
 }
 
 void Renderer::drawFirstPerson(const Scene& scene, const ViewCamera& camera, const std::vector<geom::RayHit>& hits) const
@@ -53,10 +53,13 @@ void Renderer::drawFirstPerson(const Scene& scene, const ViewCamera& camera, con
     const float projection_plane_distance = static_cast<float>(screen_width) * 0.5F / std::tan(camera.getFov() * 0.5F);
     const float column_width = static_cast<float>(screen_width) / static_cast<float>(hits.size());
     const float wall_scale = 90.0F;
+    const float pitch_offset = std::tan(camera.getPitch()) * projection_plane_distance;
+    const float horizon_y = static_cast<float>(screen_height) * 0.5F + pitch_offset;
+    const int horizon_line = std::clamp(static_cast<int>(horizon_y), 0, screen_height);
 
     ClearBackground(BLACK);
-    DrawRectangle(0, 0, screen_width, screen_height / 2, { 38, 42, 49, 255 });
-    DrawRectangle(0, screen_height / 2, screen_width, screen_height / 2, { 24, 24, 25, 255 });
+    DrawRectangle(0, 0, screen_width, horizon_line, { 38, 42, 49, 255 });
+    DrawRectangle(0, horizon_line, screen_width, screen_height - horizon_line, { 24, 24, 25, 255 });
 
     for (int i = 0; i < static_cast<int>(hits.size()); ++i)
     {
@@ -67,11 +70,11 @@ void Renderer::drawFirstPerson(const Scene& scene, const ViewCamera& camera, con
             continue;
         }
 
+        const Wall& wall = scene.getWalls()[hit.wall_index];
         const float corrected_distance = hit.distance * std::cos(hit.ray_angle - camera.getAngle());
         const float wall_height = wall_scale * projection_plane_distance / std::max(corrected_distance, 1.0F);
         const float x = static_cast<float>(i) * column_width;
-        const float y = (static_cast<float>(screen_height) - wall_height) * 0.5F;
-        const Wall& wall = scene.getWalls()[hit.wall_index];
+        const float y = horizon_y - wall_height * 0.5F;
         const float light = 1.0F - std::clamp(corrected_distance / 800.0F, 0.0F, 0.85F);
 
         DrawRectangle(
@@ -82,6 +85,6 @@ void Renderer::drawFirstPerson(const Scene& scene, const ViewCamera& camera, con
             shade(wall.color, light));
     }
 
-    DrawText("W/S move, <-/-> turn, A/D strafe, Shift faster, Tab view", 16, 16, 20, RAYWHITE);
+    DrawText("W/S move, <-/-> turn, A/D strafe, Up/Down look, Shift faster, Tab view", 16, 16, 20, RAYWHITE);
 
 }
